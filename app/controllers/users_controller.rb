@@ -7,12 +7,14 @@ class UsersController < ApplicationController
   end
 
   def create
-    @user = User.new(user_params)
-    if @user.save
-      log_in(@user)
-      redirect_to new_order_path
-    else
-      render :new
+    ActiveRecord::Base.transaction do
+      @user = User.lock.new(user_params)
+      if @user.save
+        log_in(@user)
+        redirect_to new_order_path
+      else
+        render :new
+      end
     end
   end
 
